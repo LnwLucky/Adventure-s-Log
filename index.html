@@ -79,7 +79,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-300">
-                            Adventurer's Log
+                            Adventure's Log
                         </h1>
                         <span id="rank-badge-header" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700 font-num">
                             Rank F
@@ -91,7 +91,7 @@
 
             <!-- Header Quick Stats -->
             <div class="hidden sm:flex items-center gap-3.5 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/80 text-xs">
-                <div class="flex items-center gap-1.5 bg-amber-950/70 border border-amber-600/50 px-2.5 py-1 rounded-lg text-amber-300 font-num text-xs">
+                <div class="flex items-center gap-1.5 bg-amber-950/70 border border-amber-600/50 px-2.5 py-1 rounded-lg text-amber-300 font-num text-xs" title="คอมโบวันผจญภัยต่อเนื่อง">
                     <i class="fa-solid fa-fire text-amber-400 animate-pulse"></i>
                     <span id="header-streak" class="font-extrabold">1 วัน</span>
                 </div>
@@ -311,9 +311,14 @@
                             </h2>
                             <p class="text-xs text-slate-400">ติ๊กเครื่องหมายเมื่อทำเควสต์สำเร็จเพื่อรับ EXP และอัปเกรดสเตตัส</p>
                         </div>
-                        <button onclick="switchTab('quests')" class="text-xs text-indigo-400 hover:underline font-semibold">
-                            จัดการเควสต์ทั้งหมด →
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="resetDailyQuests()" class="text-xs text-slate-400 hover:text-amber-400 transition py-1 px-2 rounded-lg bg-slate-800/80 border border-slate-700">
+                                <i class="fa-solid fa-arrows-rotate mr-1"></i>รีเซ็ตประจำวัน
+                            </button>
+                            <button onclick="switchTab('quests')" class="text-xs text-indigo-400 hover:underline font-semibold">
+                                จัดการเควสต์ทั้งหมด →
+                            </button>
+                        </div>
                     </div>
 
                     <div id="dashboard-quest-list" class="space-y-3">
@@ -395,41 +400,66 @@
         </div>
     </div>
 
-    <!-- Modal: New Quest -->
-    <div id="quest-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <i class="fa-solid fa-scroll text-indigo-400"></i> สร้างเควสต์ใหม่
-            </h3>
-            <form onsubmit="saveNewQuest(event)" class="space-y-3">
+    <!-- Modal: New Quest (แบบละเอียดตามที่คุณต้องการ) -->
+    <div id="quest-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-scroll text-amber-400"></i> สร้างเควสต์ใหม่ (New Quest)
+                </h3>
+                <button onclick="closeNewQuestModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveNewQuest(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">ชื่อเควสต์</label>
-                    <input type="text" id="new-quest-title" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-slate-300 font-semibold mb-1">ชื่อเควสต์ *</label>
+                    <input type="text" id="new-quest-title" required placeholder="เช่น ท่องศัพท์อังกฤษ 30 คำ / วิดพื้น 50 ครั้ง" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 focus:outline-none focus:border-indigo-500">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+
+                <div>
+                    <label class="block text-slate-400 mb-1">รายละเอียดเควสต์ (เป้าหมาย)</label>
+                    <input type="text" id="new-quest-desc" placeholder="เช่น ฝึกความจำระยะยาวเพื่อเตรียมสอบ" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">หมวดหมู่</label>
-                        <select id="new-quest-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
-                            <option value="Main Quest">Main Quest</option>
-                            <option value="Side Quest">Side Quest</option>
-                            <option value="Workout">Workout</option>
-                            <option value="Discipline">Discipline</option>
+                        <label class="block text-slate-300 font-semibold mb-1">สายพลังที่จะเพิ่ม *</label>
+                        <select id="new-quest-stat" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            <option value="int">📚 การเรียน (INT)</option>
+                            <option value="str">🏋️ ออกกำลังกาย (STR)</option>
+                            <option value="mnd">🧘 สมาธิ/พักผ่อน (MND)</option>
+                            <option value="dex">⚡ วินัย/ลงมือทำ (DEX)</option>
+                            <option value="cre">🎨 ความคิดสร้างสรรค์ (CRE)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">ค่าพลังที่จะได้รับ</label>
-                        <select id="new-quest-stat" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
-                            <option value="int">INT (การเรียน)</option>
-                            <option value="str">STR (ออกกำลังกาย)</option>
-                            <option value="mnd">MND (สมาธิ/พักผ่อน)</option>
-                            <option value="dex">DEX (วินัย)</option>
-                            <option value="cre">CRE (ความคิดสร้างสรรค์)</option>
+                        <label class="block text-slate-300 font-semibold mb-1">ระดับความยาก (Rank)</label>
+                        <select id="new-quest-rank" onchange="autoFillQuestRewards()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                            <option value="Rank D">Rank D (เควสต์ง่าย)</option>
+                            <option value="Rank C" selected>Rank C (เควสต์ปานกลาง)</option>
+                            <option value="Rank B">Rank B (เควสต์ยาก)</option>
+                            <option value="Rank A">Rank A (เควสต์ท้าทาย)</option>
+                            <option value="Rank S">Rank S (เควสต์ระดับตำนาน)</option>
                         </select>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeNewQuestModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500">เพิ่มเควสต์</button>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">EXP ตัวละครที่จะได้รับ</label>
+                        <input type="number" id="new-quest-exp" value="30" min="5" max="1000" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-num focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 font-semibold mb-1">แต้มพลัง Stat ที่จะได้รับ</label>
+                        <input type="number" id="new-quest-stat-pts" value="15" min="1" max="500" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-slate-100 font-num focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeNewQuestModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-lg shadow-amber-500/20">สร้างเควสต์</button>
                 </div>
             </form>
         </div>
@@ -441,11 +471,11 @@
             <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
                 <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i> สำรอง / กู้คืนข้อมูล (Backup)
             </h3>
-            <p class="text-xs text-slate-400">คุณสามารถดาวน์โหลดข้อมูลเกมทั้งหมดเก็บไว้เป็นไฟล์ JSON หรือคัดลอกข้อความเพื่อย้ายเครื่องได้</p>
+            <p class="text-xs text-slate-400">ดาวน์โหลดข้อมูลเกมเก็บไว้เป็นไฟล์ JSON หรืออัปโหลดเพื่อกู้คืนข้อมูลเดิม</p>
             <div class="flex gap-2">
-                <button onclick="exportData()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition">ดาวน์โหลดไฟล์ Backup</button>
+                <button onclick="exportData()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition">ดาวน์โหลด Backup</button>
                 <label class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center cursor-pointer transition">
-                    นำเข้าข้อมูล <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+                    นำเข้าไฟล์ <input type="file" accept=".json" onchange="importData(event)" class="hidden">
                 </label>
             </div>
             <div class="text-right pt-2">
@@ -471,10 +501,10 @@
                 creStat: { level: 1, exp: 10, pts: 10 }
             },
             quests: [
-                { id: 1, title: "ทบทวนบทเรียน / อ่านหนังสือ 1 ชม.", category: "Main Quest", statType: "int", expReward: 30, statAmount: 15, completed: false },
-                { id: 2, title: "ออกกำลังกาย / ยืดเส้นยืดสาย", category: "Workout", statType: "str", expReward: 25, statAmount: 15, completed: false },
-                { id: 3, title: "นั่งสมาธิ / พักผ่อนนอนหลับเพียงพอ", category: "Side Quest", statType: "mnd", expReward: 20, statAmount: 10, completed: false },
-                { id: 4, title: "จัดโต๊ะอ่านหนังสือให้เรียบร้อย", category: "Discipline", statType: "dex", expReward: 15, statAmount: 10, completed: false }
+                { id: 1, title: "ทบทวนบทเรียน / อ่านหนังสือ 1 ชม.", description: "เก็บเนื้อหาตามตารางประจำวัน", category: "Main Quest", rank: "Rank C", statType: "int", expReward: 30, statAmount: 15, completed: false },
+                { id: 2, title: "ออกกำลังกาย / ยืดเส้นยืดสาย", description: "VILPA หรือวิดพื้นยามเช้า", category: "Workout", rank: "Rank D", statType: "str", expReward: 25, statAmount: 10, completed: false },
+                { id: 3, title: "นั่งสมาธิ / พักผ่อนนอนหลับ", description: "ชาร์จพลังสมองให้เต็มร้อย", category: "Side Quest", rank: "Rank D", statType: "mnd", expReward: 20, statAmount: 10, completed: false },
+                { id: 4, title: "จัดโต๊ะอ่านหนังสือให้เรียบร้อย", description: "สร้างสภาพแวดล้อมปลอดสิ่งเร้า", category: "Discipline", rank: "Rank D", statType: "dex", expReward: 15, statAmount: 10, completed: false }
             ],
             bosses: [
                 { id: 1, name: "สอบ Mock TPAT 1", date: "2026-10-25" },
@@ -486,8 +516,30 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadStorage();
+            checkDailyReset();
             renderAll();
         });
+
+        function checkDailyReset() {
+            const lastDate = localStorage.getItem('rpg_last_date');
+            const today = new Date().toDateString();
+
+            if (lastDate !== lastDate && lastDate !== today) {
+                appData.quests.forEach(q => { q.completed = false; });
+                appData.character.streak += 1;
+                localStorage.setItem('rpg_last_date', today);
+                saveStorage();
+            } else if (!lastDate) {
+                localStorage.setItem('rpg_last_date', today);
+            }
+        }
+
+        function resetDailyQuests() {
+            appData.quests.forEach(q => q.completed = false);
+            saveStorage();
+            renderAll();
+            alert("🔄 รีเซ็ตเควสต์ประจำวันเรียบร้อย!");
+        }
 
         function switchTab(tab) {
             document.getElementById('view-dashboard').classList.toggle('hidden', tab !== 'dashboard');
@@ -526,7 +578,6 @@
 
             document.getElementById('header-streak').innerText = `${c.streak} วัน`;
 
-            // Calculate Combat Power (CP)
             const totalStats = c.intStat.pts + c.strStat.pts + c.mndStat.pts + c.dexStat.pts + c.creStat.pts;
             const cp = c.level * 50 + totalStats;
             document.getElementById('char-cp').innerText = cp;
@@ -597,8 +648,12 @@
                         <div class="flex items-center gap-3">
                             <input type="checkbox" ${q.completed ? 'checked' : ''} onchange="toggleQuest(${q.id})" class="w-4 h-4 rounded border-slate-600 bg-slate-900 text-indigo-600 focus:ring-0 cursor-pointer">
                             <div>
-                                <p class="text-xs font-bold text-slate-200 ${q.completed ? 'line-through text-slate-500' : ''}">${q.title}</p>
-                                <div class="flex items-center gap-2 mt-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-xs font-bold text-slate-200 ${q.completed ? 'line-through text-slate-500' : ''}">${q.title}</p>
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-num">${q.rank || 'Rank C'}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-0.5">${q.description || ''}</p>
+                                <div class="flex items-center gap-2 mt-1.5">
                                     <span class="text-[10px] px-2 py-0.5 rounded-full border ${badgeColor}">+${q.statAmount} ${q.statType.toUpperCase()}</span>
                                     <span class="text-[10px] text-indigo-300 font-num">+${q.expReward} EXP</span>
                                 </div>
@@ -686,17 +741,49 @@
 
         function openNewQuestModal() { document.getElementById('quest-modal').classList.remove('hidden'); }
         function closeNewQuestModal() { document.getElementById('quest-modal').classList.add('hidden'); }
+        
+        function autoFillQuestRewards() {
+            const rank = document.getElementById('new-quest-rank').value;
+            const expInput = document.getElementById('new-quest-exp');
+            const statInput = document.getElementById('new-quest-stat-pts');
+
+            if (rank === 'Rank D') { expInput.value = 15; statInput.value = 10; }
+            else if (rank === 'Rank C') { expInput.value = 30; statInput.value = 15; }
+            else if (rank === 'Rank B') { expInput.value = 50; statInput.value = 25; }
+            else if (rank === 'Rank A') { expInput.value = 80; statInput.value = 40; }
+            else if (rank === 'Rank S') { expInput.value = 150; statInput.value = 75; }
+        }
+
         function saveNewQuest(e) {
             e.preventDefault();
             const title = document.getElementById('new-quest-title').value;
-            const category = document.getElementById('new-quest-category').value;
+            const description = document.getElementById('new-quest-desc').value;
             const statType = document.getElementById('new-quest-stat').value;
-            appData.quests.push({ id: Date.now(), title, category, statType, expReward: 25, statAmount: 15, completed: false });
+            const rank = document.getElementById('new-quest-rank').value;
+            const expReward = parseInt(document.getElementById('new-quest-exp').value, 10) || 30;
+            const statAmount = parseInt(document.getElementById('new-quest-stat-pts').value, 10) || 15;
+
+            appData.quests.push({
+                id: Date.now(),
+                title,
+                description,
+                category: 'Main Quest',
+                rank,
+                statType,
+                expReward,
+                statAmount,
+                completed: false
+            });
+
             saveStorage();
             renderQuests();
             closeNewQuestModal();
+            
+            // Clear form
             document.getElementById('new-quest-title').value = '';
+            document.getElementById('new-quest-desc').value = '';
         }
+
         function deleteQuest(id) {
             appData.quests = appData.quests.filter(q => q.id !== id);
             saveStorage();
@@ -705,6 +792,7 @@
 
         function openBackupModal() { document.getElementById('backup-modal').classList.remove('hidden'); }
         function closeBackupModal() { document.getElementById('backup-modal').classList.add('hidden'); }
+        
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
             const dlAnchor = document.createElement('a');
@@ -714,6 +802,7 @@
             dlAnchor.click();
             dlAnchor.remove();
         }
+
         function importData(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -741,6 +830,7 @@
         function saveStorage() {
             localStorage.setItem('rpg_clean_data', JSON.stringify(appData));
         }
+        
         function loadStorage() {
             const saved = localStorage.getItem('rpg_clean_data');
             if (saved) {
