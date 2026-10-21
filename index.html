@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adventure's Log - Ultimate RPG Quest & Study Tracker</title>
+    <title>Adventure's Log - Spaced Repetition & Study Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -106,14 +106,11 @@
                 <button onclick="switchTab('quests')" id="tab-quests" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
                     <i class="fa-solid fa-scroll"></i><span>เควสต์</span>
                 </button>
+                <button onclick="switchTab('spaced')" id="tab-spaced" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-brain text-purple-400"></i><span>คลังทบทวนซ้ำ</span>
+                </button>
                 <button onclick="switchTab('errors')" id="tab-errors" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
                     <i class="fa-solid fa-triangle-exclamation text-rose-400"></i><span>Error Log</span>
-                </button>
-                <button onclick="switchTab('spaced')" id="tab-spaced" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <i class="fa-solid fa-brain text-purple-400"></i><span>ทบทวนซ้ำ</span>
-                </button>
-                <button onclick="switchTab('vocab')" id="tab-vocab" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
-                    <i class="fa-solid fa-language text-emerald-400"></i><span>คลังศัพท์</span>
                 </button>
             </nav>
         </div>
@@ -151,7 +148,7 @@
                         </div>
                     </div>
                     <button onclick="openTitlesModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 border border-slate-700">
-                        <i class="fa-solid fa-medal text-amber-400"></i> จัดการฉายา & เหรียญตรา (<span id="unlocked-titles-count">1</span>/5)
+                        <i class="fa-solid fa-medal text-amber-400"></i> ฉายา & เหรียญตรา (<span id="unlocked-titles-count">1</span>/5)
                     </button>
                 </div>
 
@@ -227,7 +224,21 @@
             <div id="full-quest-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
-        <!-- ================= VIEW 3: ERROR LOG (ระบบปากกาแดง) ================= -->
+        <!-- ================= VIEW 3: SPACED REPETITION (คลังทบทวนซ้ำ) ================= -->
+        <div id="view-spaced" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">🧠 คลังความทรงจำ (Spaced Repetition Tracker)</h2>
+                    <p class="text-xs text-slate-400">เลือกโหมดทบทวนเนื้อหา (Phase II) หรือโจทย์ข้อสอบ (Incorrect MCQs) เลื่อนรอบอัตโนมัติ</p>
+                </div>
+                <button onclick="openSpacedModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มรอบทบทวนใหม่
+                </button>
+            </div>
+            <div id="spaced-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- ================= VIEW 4: ERROR LOG (ระบบปากกาแดง) ================= -->
         <div id="view-errors" class="hidden space-y-6">
             <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
                 <div>
@@ -241,41 +252,9 @@
             <div id="error-log-list" class="space-y-3"></div>
         </div>
 
-        <!-- ================= VIEW 4: SPACED REPETITION (คลังความทรงจำ) ================= -->
-        <div id="view-spaced" class="hidden space-y-6">
-            <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-100">🧠 คลังความทรงจำ (Spaced Repetition Tracker)</h2>
-                    <p class="text-xs text-slate-400">ระบบเตือนความจำบทเรียนตามรอบ (3 วัน, 7 วัน, 14 วัน) แปลงร่างเป็นเควสต์ทองเมื่อถึงกำหนด</p>
-                </div>
-                <button onclick="openSpacedModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">
-                    <i class="fa-solid fa-plus mr-1"></i> เพิ่มรอบทบทวน
-                </button>
-            </div>
-            <div id="spaced-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-        </div>
-
-        <!-- ================= VIEW 5: VOCAB FLASHCARD MINIGAME ================= -->
-        <div id="view-vocab" class="hidden space-y-6">
-            <div class="rpg-card rounded-2xl p-6 border-emerald-500/30 max-w-xl mx-auto text-center space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-base font-bold text-emerald-400"><i class="fa-solid fa-language mr-1"></i> Vocab Flashcard Minigame</h2>
-                    <span id="vocab-score" class="text-xs font-bold text-amber-400 font-num">คะแนนต่อเนื่อง: 0</span>
-                </div>
-                <div id="flashcard-container" class="bg-slate-800/80 border border-slate-700 p-8 rounded-2xl space-y-4">
-                    <p class="text-xs text-slate-400">คำศัพท์ภาษาอังกฤษ (NETSAT & A-Level)</p>
-                    <h3 id="vocab-word" class="text-3xl font-black text-white font-num tracking-wider">Loading...</h3>
-                    <div id="vocab-options" class="grid grid-cols-2 gap-3 pt-4"></div>
-                </div>
-                <button onclick="nextVocabCard()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20">
-                    สุ่มคำถัดไป (<span id="vocab-exp-reward">+20 INT EXP</span>)
-                </button>
-            </div>
-        </div>
-
     </main>
 
-    <!-- Modals (Character, Boss, Quest, Error Log, Spaced, Titles, Backup) -->
+    <!-- Modals -->
     <div id="char-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
             <h3 class="text-lg font-bold text-slate-100">ปรับแต่งตัวละคร</h3>
@@ -309,7 +288,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
             <h3 class="text-base font-bold text-slate-100"><i class="fa-solid fa-scroll text-amber-400"></i> สร้างเควสต์ใหม่</h3>
             <form onsubmit="saveNewQuest(event)" class="space-y-3 text-xs">
-                <input type="text" id="new-quest-title" required placeholder="ชื่อเควสต์ (เช่น ท่องศัพท์อังกฤษ 30 คำ)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
+                <input type="text" id="new-quest-title" required placeholder="ชื่อเควสต์ (เช่น อ่านชีวะบทที่ 14)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
                 <input type="text" id="new-quest-desc" placeholder="รายละเอียดเป้าหมาย" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
                 <div class="grid grid-cols-2 gap-3">
                     <select id="new-quest-stat" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
@@ -338,6 +317,30 @@
         </div>
     </div>
 
+    <!-- Spaced Repetition Modal -->
+    <div id="spaced-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-100"><i class="fa-solid fa-brain text-purple-400"></i> เพิ่มรายการทบทวน (Spaced Repetition)</h3>
+            <form onsubmit="saveSpacedItem(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">หัวข้อบทเรียน / ข้อสอบที่ต้องทบทวน</label>
+                    <input type="text" id="spaced-title" required placeholder="เช่น NETSAT ชีวะ บทที่ 14 หรือ ข้อสอบคณิต 25 พ.ศ. ชุด 1" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">ประเภทการทบทวน (Spaced Schedule)</label>
+                    <select id="spaced-mode" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
+                        <option value="review">Phase II: ทบทวนเนื้อหา (Day 1, 3, 7, 14, 30)</option>
+                        <option value="mcq">Incorrect MCQs: โจทย์ที่ทำผิด (Day 1, 6, 14, 30, 60)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('spaced-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold">เพิ่มในคลัง</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Error Log Modal -->
     <div id="error-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
@@ -351,25 +354,6 @@
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('error-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">ยกเลิก</button>
                     <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold">บันทึกจุดหลุด</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Spaced Repetition Modal -->
-    <div id="spaced-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
-            <h3 class="text-base font-bold text-slate-100"><i class="fa-solid fa-brain text-purple-400"></i> เพิ่มรอบทบทวน (Spaced Repetition)</h3>
-            <form onsubmit="saveSpacedItem(event)" class="space-y-3 text-xs">
-                <input type="text" id="spaced-title" required placeholder="หัวข้อ/บทเรียนที่ต้องทบทวน (เช่น NETSAT บท 15)" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
-                <select id="spaced-interval" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-slate-100">
-                    <option value="3">รอบ 3 วัน</option>
-                    <option value="7" selected>รอบ 7 วัน</option>
-                    <option value="14">รอบ 14 วัน</option>
-                </select>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeModal('spaced-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold">เพิ่มในคลังความทรงจำ</button>
                 </div>
             </form>
         </div>
@@ -402,6 +386,12 @@
 
     <!-- Main JavaScript -->
     <script>
+        // Spaced Repetition Schedules
+        const SPACED_SCHEDULES = {
+            review: [1, 3, 7, 14, 30],
+            mcq: [1, 6, 14, 30, 60]
+        };
+
         let appData = {
             character: {
                 name: "ผู้กล้าแห่งการเรียนรู้",
@@ -416,8 +406,8 @@
                 dexStat: { level: 1, exp: 10, pts: 10 }
             },
             quests: [
-                { id: 1, title: "ทบทวนชีวะบทที่ 14-15 + Blurting", description: "เขียนสรุปความจำลงกระดาษ", category: "Main Quest", rank: "Rank C", statType: "int", expReward: 30, statAmount: 15, completed: false },
-                { id: 2, title: "วิดพื้นกระตุ้นกล้ามเนื้อยามเช้า", description: "VILPA เบาๆ ปลุกสมอง", category: "Workout", rank: "Rank D", statType: "str", expReward: 25, statAmount: 10, completed: false }
+                { id: 1, title: "ทบทวนชีวะบทที่ 14 + Blurting", description: "เขียนสรุปความจำลงกระดาษเปล่า", category: "Main Quest", rank: "Rank C", statType: "int", expReward: 30, statAmount: 15, completed: false },
+                { id: 2, title: "วิดพื้นยามเช้า 2 เซต", description: "VILPA เบาๆ ปลุกสมองก่อนอ่านหนังสือ", category: "Workout", rank: "Rank D", statType: "str", expReward: 25, statAmount: 10, completed: false }
             ],
             bosses: [
                 { id: 1, name: "สอบ Mock TPAT 1", date: "2026-10-25" },
@@ -427,42 +417,33 @@
                 { id: 1, title: "ลืมกระจายเครื่องหมายลบหน้าวงเล็บ", type: "Careless", fixed: false }
             ],
             spacedItems: [
-                { id: 1, title: "NETSAT ชีวะ บทที่ 14", targetDate: new Date(Date.now() + 86400000 * 3).toISOString(), interval: 3, completed: false }
+                { id: 1, title: "NETSAT ชีวะ บทที่ 14", mode: "review", stepIndex: 0, targetDate: new Date(Date.now() + 86400000 * 1).toISOString(), completed: false },
+                { id: 2, title: "โจทย์คณิต 25 พ.ศ. ชุดที่ 1 ข้อที่ผิด", mode: "mcq", stepIndex: 0, targetDate: new Date(Date.now() + 86400000 * 1).toISOString(), completed: false }
             ],
             titles: [
                 { id: 't1', name: 'Novice Scholar', desc: 'เริ่มต้นเส้นทางผู้กล้า', unlocked: true },
                 { id: 't2', name: 'ผู้มีวินัยดั่งเหล็กไหล', desc: 'รักษา Streak ครบ 7 วัน', unlocked: false, cond: () => appData.character.streak >= 7 },
-                { id: 't3', name: 'นักปราชญ์แห่งห้องสมุด', desc: 'ทำเควสต์สำเร็จสะสมครบ 50 ข้อ', unlocked: false, cond: () => false },
-                { id: 't4', name: 'ผู้ไร้รอยแผล', desc: 'เคลียร์ Error Log จนหมดเกลี้ยง', unlocked: false, cond: () => appData.errorLogs.length > 0 && appData.errorLogs.every(e => e.fixed) },
-                { id: 't5', name: 'เซียนคำศัพท์', desc: 'ตอบ Flashcard ถูกต้องต่อเนื่อง 10 ข้อ', unlocked: false }
-            ],
-            vocabList: [
-                { word: "allowance", meaning: "เงินเบี้ยเลี้ยง / ค่าขนม", options: ["เงินเบี้ยเลี้ยง / ค่าขนม", "ประเมิน", "หลากหลาย", "ความคาดหวัง"] },
-                { word: "artificial", meaning: "เทียม / สังเคราะห์", options: ["ตามธรรมเนียม", "เทียม / สังเคราะห์", "วิกฤต", "แปลกประหลาด"] },
-                { word: "assess", meaning: "ประเมิน", options: ["ประเมิน", "ทุ่มเท", "มากมาย", "สงวนท่าที"] },
-                { word: "conventional", meaning: "ตามธรรมเนียมเดิม", options: ["หลากหลาย", "ตามธรรมเนียมเดิม", "ศักยภาพ", "ภาวะถดถอย"] },
-                { word: "crucial", meaning: "สำคัญยิ่ง / วิกฤต", options: ["สำคัญยิ่ง / วิกฤต", "กิริยาท่าทาง", "เติบโตเต็มที่", "ท่วมท้น"] }
+                { id: 't3', name: 'นักปราชญ์แห่งห้องสมุด', desc: 'เลเวลตัวละครถึง Lv. 5', unlocked: false, cond: () => appData.character.level >= 5 },
+                { id: 't4', name: 'ผู้ไร้รอยแผล', desc: 'เคลียร์ Error Log จนหมดเกลี้ยง', unlocked: false, cond: () => appData.errorLogs.length > 0 && appData.errorLogs.every(e => e.fixed) }
             ]
         };
-
-        let currentVocabIdx = 0;
-        let vocabStreak = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
             loadStorage();
             checkDailyReset();
             renderAll();
-            loadVocabCard();
         });
 
         function checkDailyReset() {
             const lastDate = localStorage.getItem('rpg_last_date');
             const today = new Date().toDateString();
-            if (lastDate !== today) {
+            if (lastDate && lastDate !== today) {
                 appData.quests.forEach(q => { q.completed = false; });
                 appData.character.streak += 1;
                 localStorage.setItem('rpg_last_date', today);
                 saveStorage();
+            } else if (!lastDate) {
+                localStorage.setItem('rpg_last_date', today);
             }
         }
 
@@ -474,8 +455,9 @@
         }
 
         function switchTab(tab) {
-            ['dashboard', 'quests', 'errors', 'spaced', 'vocab'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+            ['dashboard', 'quests', 'spaced', 'errors'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.toggle('hidden', t !== tab);
                 const btn = document.getElementById(`tab-${t}`);
                 if (btn) {
                     btn.className = t === tab 
@@ -490,8 +472,8 @@
             renderStats();
             renderBosses();
             renderQuests();
-            renderErrorLogs();
             renderSpaced();
+            renderErrorLogs();
             checkTitlesUnlock();
         }
 
@@ -569,6 +551,71 @@
             });
         }
 
+        function renderSpaced() {
+            const list = document.getElementById('spaced-list');
+            list.innerHTML = '';
+            const today = new Date(); today.setHours(0,0,0,0);
+
+            if (appData.spacedItems.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 col-span-2 text-center py-4">ยังไม่มีรายการทบทวนซ้ำ</p>`;
+                return;
+            }
+
+            appData.spacedItems.forEach(s => {
+                const target = new Date(s.targetDate);
+                const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                const schedule = SPACED_SCHEDULES[s.mode || 'review'];
+                const currentDayInterval = schedule[s.stepIndex || 0];
+                const modeLabel = s.mode === 'mcq' ? '❌ Incorrect MCQs' : '📘 Phase II Review';
+                const modeColor = s.mode === 'mcq' ? 'bg-rose-950 text-rose-300 border-rose-800' : 'bg-purple-950 text-purple-300 border-purple-800';
+
+                const isDue = diffDays <= 0;
+
+                list.innerHTML += `
+                    <div class="rpg-card p-4 rounded-xl border border-slate-700/80 space-y-3 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] px-2 py-0.5 rounded border ${modeColor}">${modeLabel}</span>
+                            <span class="text-[10px] text-slate-400 font-num">รอบที่ ${ (s.stepIndex || 0) + 1 } / ${schedule.length} (Day ${currentDayInterval})</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-100 text-sm">${s.title}</p>
+                            <p class="text-[11px] mt-1 ${isDue ? 'text-amber-400 font-bold animate-pulse' : 'text-slate-400'}">
+                                ${isDue ? '🚨 ถึงเวลาทบทวนแล้ววันนี้!' : `กำหนดทบทวนในอีก ${diffDays} วัน`}
+                            </p>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+                            <button onclick="advanceSpacedStep(${s.id})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[11px] font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> ทบทวนแล้ว (ไปรอบถัดไป)
+                            </button>
+                            <button onclick="deleteSpaced(${s.id})" class="text-slate-500 hover:text-red-400 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function advanceSpacedStep(id) {
+            const s = appData.spacedItems.find(item => item.id === id);
+            if (!s) return;
+
+            const schedule = SPACED_SCHEDULES[s.mode || 'review'];
+            s.stepIndex = (s.stepIndex || 0) + 1;
+
+            if (s.stepIndex >= schedule.length) {
+                alert(`🎉 ยินดีด้วย! คุณทบทวนเรื่อง "${s.title}" ครบตามตารางทั้งหมดเรียบร้อยแล้ว!`);
+                appData.spacedItems = appData.spacedItems.filter(item => item.id !== id);
+            } else {
+                const nextDays = schedule[s.stepIndex];
+                s.targetDate = new Date(Date.now() + 86400000 * nextDays).toISOString();
+                alert(`✅ บันทึกการทบทวนสำเร็จ! รอบถัดไปคือ Day ${nextDays} (ในอีก ${nextDays} วัน)`);
+            }
+
+            addExpAndStat(30, 'int', 15);
+            saveStorage();
+            renderAll();
+        }
+
         function renderErrorLogs() {
             const list = document.getElementById('error-log-list');
             list.innerHTML = '';
@@ -583,23 +630,6 @@
                             </div>
                         </div>
                         <button onclick="deleteErrorLog(${e.id})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
-                    </div>`;
-            });
-        }
-
-        function renderSpaced() {
-            const list = document.getElementById('spaced-list');
-            list.innerHTML = '';
-            const today = new Date();
-            appData.spacedItems.forEach(s => {
-                const target = new Date(s.targetDate);
-                const diff = Math.ceil((target - today)/(1000*60*60*24));
-                list.innerHTML += `
-                    <div class="rpg-card p-4 rounded-xl border-purple-500/30 space-y-2 text-xs">
-                        <div class="flex justify-between items-center"><span class="text-[10px] px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800">รอบ ${s.interval} วัน</span>
-                        <button onclick="deleteSpaced(${s.id})" class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button></div>
-                        <p class="font-bold text-slate-100">${s.title}</p>
-                        <p class="text-[11px] ${diff <= 0 ? 'text-amber-400 font-bold animate-pulse' : 'text-slate-400'}">${diff <= 0 ? '🚨 ถึงเวลาทบทวนแล้ว!' : `ครบกำหนดในอีก ${diff} วัน`}</p>
                     </div>`;
             });
         }
@@ -632,41 +662,11 @@
             if (s.exp >= s.level * 50) { s.exp -= s.level * 50; s.level += 1; }
         }
 
-        // Vocab Minigame
-        function loadVocabCard() {
-            const v = appData.vocabList[currentVocabIdx];
-            document.getElementById('vocab-word').innerText = v.word;
-            const optContainer = document.getElementById('vocab-options');
-            optContainer.innerHTML = '';
-            v.options.forEach(opt => {
-                optContainer.innerHTML += `<button onclick="checkVocabAnswer('${opt}', '${v.meaning}')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs text-slate-200 transition">${opt}</button>`;
-            });
-        }
-
-        function checkVocabAnswer(selected, correct) {
-            if (selected === correct) {
-                vocabStreak++;
-                document.getElementById('vocab-score').innerText = `คะแนนต่อเนื่อง: ${vocabStreak}`;
-                addExpAndStat(20, 'int', 10);
-                alert("✅ ถูกต้อง! รับ +20 INT EXP");
-                nextVocabCard();
-            } else {
-                vocabStreak = 0;
-                document.getElementById('vocab-score').innerText = `คะแนนต่อเนื่อง: 0`;
-                alert(`❌ ผิด คำตอบที่ถูกต้องคือ: ${correct}`);
-            }
-        }
-
-        function nextVocabCard() {
-            currentVocabIdx = (currentVocabIdx + 1) % appData.vocabList.length;
-            loadVocabCard();
-        }
-
         function checkTitlesUnlock() {
             appData.titles.forEach(t => {
                 if (!t.unlocked && t.cond && t.cond()) {
                     t.unlocked = true;
-                    alert(`🏆 ปลดล็อกฉายใหม่: "${t.name}" (${t.desc})!`);
+                    alert(`🏆 ปลดล็อกฉายาใหม่: "${t.name}" (${t.desc})!`);
                 }
             });
         }
@@ -734,13 +734,29 @@
         }
         function deleteErrorLog(id) { appData.errorLogs = appData.errorLogs.filter(e => e.id !== id); saveStorage(); renderErrorLogs(); }
         function openSpacedModal() { document.getElementById('spaced-modal').classList.remove('hidden'); }
+        
         function saveSpacedItem(e) {
             e.preventDefault();
-            const interval = parseInt(document.getElementById('spaced-interval').value);
-            const targetDate = new Date(Date.now() + 86400000 * interval).toISOString();
-            appData.spacedItems.push({ id: Date.now(), title: document.getElementById('spaced-title').value, targetDate, interval, completed: false });
-            saveStorage(); renderSpaced(); closeModal('spaced-modal');
+            const mode = document.getElementById('spaced-mode').value;
+            const schedule = SPACED_SCHEDULES[mode];
+            const firstDays = schedule[0]; // Day 1
+            const targetDate = new Date(Date.now() + 86400000 * firstDays).toISOString();
+            
+            appData.spacedItems.push({ 
+                id: Date.now(), 
+                title: document.getElementById('spaced-title').value, 
+                mode, 
+                stepIndex: 0, 
+                targetDate, 
+                completed: false 
+            });
+            
+            saveStorage(); 
+            renderSpaced(); 
+            closeModal('spaced-modal');
+            document.getElementById('spaced-title').value = '';
         }
+
         function deleteSpaced(id) { appData.spacedItems = appData.spacedItems.filter(s => s.id !== id); saveStorage(); renderSpaced(); }
         function deleteQuest(id) { appData.quests = appData.quests.filter(q => q.id !== id); saveStorage(); renderQuests(); }
         function openBackupModal() { document.getElementById('backup-modal').classList.remove('hidden'); }
@@ -758,8 +774,8 @@
             };
             reader.readAsText(file);
         }
-        function saveStorage() { localStorage.setItem('rpg_ultimate_data', JSON.stringify(appData)); }
-        function loadStorage() { const saved = localStorage.getItem('rpg_ultimate_data'); if (saved) appData = JSON.parse(saved); }
+        function saveStorage() { localStorage.setItem('rpg_spaced_v2_data', JSON.stringify(appData)); }
+        function loadStorage() { const saved = localStorage.getItem('rpg_spaced_v2_data'); if (saved) appData = JSON.parse(saved); }
     </script>
 </body>
 </html>
