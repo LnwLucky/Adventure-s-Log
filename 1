@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure's Log - RPG Character & Quest Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;600;700;800;900&display=swap');
+        
+        :root {
+            --bg-dark: #090d16;
+            --card-dark: #111827;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(88, 28, 135, 0.25) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(15, 23, 42, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .font-num {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .rpg-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            backdrop-filter: blur(12px);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .rpg-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.6), 0 0 15px -3px rgba(99, 102, 241, 0.15);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+        .floating-exp {
+            animation: float-up 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md shadow-lg shadow-black/30">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-400/40">
+                    ⚔️
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-300">
+                            Adventurer's Log
+                        </h1>
+                        <span id="rank-badge-header" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700 font-num">
+                            Rank F
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">ระบบเกม RPG พัฒนาตัวเอง & เควสต์พลังชีวิต</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Stats -->
+            <div class="hidden sm:flex items-center gap-3.5 bg-slate-800/80 px-3.5 py-1.5 rounded-xl border border-slate-700/80 text-xs">
+                <div class="flex items-center gap-1.5 bg-amber-950/70 border border-amber-600/50 px-2.5 py-1 rounded-lg text-amber-300 font-num text-xs">
+                    <i class="fa-solid fa-fire text-amber-400 animate-pulse"></i>
+                    <span id="header-streak" class="font-extrabold">1 วัน</span>
+                </div>
+
+                <div class="h-5 w-px bg-slate-700"></div>
+
+                <div class="flex items-center gap-2">
+                    <span id="header-avatar-mini" class="w-7 h-7 rounded-lg bg-indigo-950 border border-indigo-500/50 flex items-center justify-center text-base">
+                        🛡️
+                    </span>
+                    <div>
+                        <div class="flex justify-between items-center gap-2">
+                            <span id="header-level" class="font-bold text-amber-400 font-num text-sm">Lv. 1</span>
+                            <span id="header-exp-text" class="text-[10px] text-slate-400 font-num">0 / 100 EXP</span>
+                        </div>
+                        <div class="w-20 bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                            <div id="header-exp-bar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="h-5 w-px bg-slate-700"></div>
+
+                <div>
+                    <span class="text-[10px] text-slate-400 block leading-tight">พลังรบรวม (CP)</span>
+                    <span id="header-cp" class="text-sm font-extrabold text-blue-400 font-num">125</span>
+                </div>
+
+                <div class="h-5 w-px bg-slate-700"></div>
+
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openBackupModal()" title="สำรอง / นำเข้าข้อมูล" class="text-slate-400 hover:text-indigo-400 transition p-1 text-xs">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </button>
+                    <button onclick="toggleSound()" id="sound-btn" title="เปิด/ปิดเสียง" class="text-slate-400 hover:text-amber-400 transition p-1 text-xs">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Buttons -->
+            <nav class="flex bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs font-semibold gap-1">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-3 py-1.5 rounded-lg transition bg-indigo-600 text-white flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>ภาพรวมตัวละคร</span>
+                </button>
+                <button onclick="switchTab('quests')" id="tab-quests" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-scroll"></i>
+                    <span>กระดานเควสต์</span>
+                    <span id="nav-quest-count" class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-slate-800 text-indigo-300 font-num">4</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 flex-grow w-full">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD (Character & Stats & Bosses) -->
+        <!-- ========================================== -->
+        <div id="view-dashboard" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT COLUMN: Character Card & Stats Breakdown (lg:col-span-5) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- 1. HERO CHARACTER PROFILE CARD -->
+                <div class="rpg-card rounded-2xl p-5 border-indigo-500/40 relative overflow-hidden">
+                    <div class="flex justify-between items-start gap-3 mb-4">
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2">
+                                <h2 id="char-name" class="text-lg font-bold text-slate-100 truncate">ผู้กล้าแห่งการเรียนรู้</h2>
+                                <button onclick="openCharacterModal()" title="แก้ไขข้อมูลตัวละคร" class="text-xs text-indigo-400 hover:text-indigo-300 transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                            <p id="char-title" class="text-xs text-indigo-300/90 font-medium">Novice Scholar (นักปราชญ์มือใหม่)</p>
+                        </div>
+                        <span id="char-rank-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold font-num bg-indigo-950 text-indigo-300 border border-indigo-700/60 shadow">
+                            Rank F
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-slate-800/50 p-3.5 rounded-xl border border-slate-700/50 mb-4">
+                        <div id="char-avatar-container" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-900 to-slate-900 border-2 border-indigo-500/60 flex items-center justify-center text-3xl shadow-md">
+                            🧙‍♂️
+                        </div>
+                        <div class="flex-grow space-y-1.5">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-xs font-semibold text-slate-400">ระดับตัวละคร</span>
+                                <span id="char-level" class="text-lg font-black text-amber-400 font-num">Lv. 1</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[11px] font-num text-slate-400 mb-1">
+                                    <span>EXP สะสม</span>
+                                    <span id="char-exp-text" class="text-indigo-300 font-semibold">0 / 100</span>
+                                </div>
+                                <div class="w-full bg-slate-700/80 h-2.5 rounded-full overflow-hidden">
+                                    <div id="char-exp-bar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-center text-xs mb-4">
+                        <div class="bg-slate-800/40 p-2 rounded-xl border border-slate-700/40">
+                            <span class="text-[10px] text-slate-400 block">⚡ พลังรบรวม (CP)</span>
+                            <span id="char-cp" class="text-base font-extrabold text-blue-400 font-num">125</span>
+                        </div>
+                        <div class="bg-slate-800/40 p-2 rounded-xl border border-slate-700/40">
+                            <span class="text-[10px] text-slate-400 block">🏆 สถานะปัจจุบัน</span>
+                            <span id="char-status-buff" class="text-xs font-bold text-amber-400 truncate block">มุ่งมั่นพัฒนาตนเอง</span>
+                        </div>
+                    </div>
+
+                    <button onclick="openCharacterModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 border border-slate-700">
+                        <i class="fa-solid fa-user-gear"></i> ปรับแต่งตัวละคร & ฉายา
+                    </button>
+                </div>
+
+                <!-- 2. SEPARATE STATS SYSTEM -->
+                <div class="rpg-card rounded-2xl p-5 border-slate-700/80">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-indigo-400"></i> ค่าพลังแยกรายด้าน (Stats)
+                            </h3>
+                            <p class="text-[11px] text-slate-400">อัปเกรดอัตโนมัติเมื่อทำเควสต์ในหมวดนั้นๆ</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3.5">
+                        <!-- INT -->
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-blue-900/40">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-2 text-xs font-bold text-blue-300">
+                                    <i class="fa-solid fa-book-open text-blue-400"></i> การเรียน & สติปัญญา (INT)
+                                </div>
+                                <span id="stat-lvl-int" class="text-xs font-bold text-blue-400 font-num">Lv. 1 (15 pts)</span>
+                            </div>
+                            <div class="w-full bg-slate-700/60 h-2 rounded-full overflow-hidden">
+                                <div id="stat-bar-int" class="bg-blue-500 h-full transition-all duration-300" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <!-- STR -->
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-amber-900/40">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-2 text-xs font-bold text-amber-300">
+                                    <i class="fa-solid fa-dumbbell text-amber-400"></i> ออกกำลังกาย & ร่างกาย (STR)
+                                </div>
+                                <span id="stat-lvl-str" class="text-xs font-bold text-amber-400 font-num">Lv. 1 (10 pts)</span>
+                            </div>
+                            <div class="w-full bg-slate-700/60 h-2 rounded-full overflow-hidden">
+                                <div id="stat-bar-str" class="bg-amber-500 h-full transition-all duration-300" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <!-- MND -->
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-emerald-900/40">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-2 text-xs font-bold text-emerald-300">
+                                    <i class="fa-solid fa-spa text-emerald-400"></i> สมาธิ & สุขภาพจิต (MND)
+                                </div>
+                                <span id="stat-lvl-mnd" class="text-xs font-bold text-emerald-400 font-num">Lv. 1 (10 pts)</span>
+                            </div>
+                            <div class="w-full bg-slate-700/60 h-2 rounded-full overflow-hidden">
+                                <div id="stat-bar-mnd" class="bg-emerald-500 h-full transition-all duration-300" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <!-- DEX -->
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-purple-900/40">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-2 text-xs font-bold text-purple-300">
+                                    <i class="fa-solid fa-bolt text-purple-400"></i> วินัย & การลงมือทำ (DEX)
+                                </div>
+                                <span id="stat-lvl-dex" class="text-xs font-bold text-purple-400 font-num">Lv. 1 (10 pts)</span>
+                            </div>
+                            <div class="w-full bg-slate-700/60 h-2 rounded-full overflow-hidden">
+                                <div id="stat-bar-dex" class="bg-purple-500 h-full transition-all duration-300" style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <!-- CRE -->
+                        <div class="bg-slate-800/50 p-3 rounded-xl border border-rose-900/40">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-2 text-xs font-bold text-rose-300">
+                                    <i class="fa-solid fa-palette text-rose-400"></i> ความคิดสร้างสรรค์ (CRE)
+                                </div>
+                                <span id="stat-lvl-cre" class="text-xs font-bold text-rose-400 font-num">Lv. 1 (10 pts)</span>
+                            </div>
+                            <div class="w-full bg-slate-700/60 h-2 rounded-full overflow-hidden">
+                                <div id="stat-bar-cre" class="bg-rose-500 h-full transition-all duration-300" style="width: 20%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. BOSS COUNTDOWN -->
+                <div class="rpg-card rounded-2xl p-5 border-amber-500/30">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                            <i class="fa-solid fa-dragon text-amber-500"></i> Boss Battle Countdown
+                        </h3>
+                        <button onclick="openBossModal()" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> เพิ่มบอส
+                        </button>
+                    </div>
+                    <div id="boss-list" class="space-y-2.5"></div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Daily Quests Quick Board (lg:col-span-7) -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="rpg-card rounded-2xl p-6 border-indigo-500/30 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-scroll text-indigo-400"></i> กระดานเควสต์ประจำวัน (Daily Quests)
+                            </h2>
+                            <p class="text-xs text-slate-400">ติ๊กเครื่องหมายเมื่อทำเควสต์สำเร็จเพื่อรับ EXP และอัปเกรดสเตตัส</p>
+                        </div>
+                        <button onclick="switchTab('quests')" class="text-xs text-indigo-400 hover:underline font-semibold">
+                            จัดการเควสต์ทั้งหมด →
+                        </button>
+                    </div>
+
+                    <div id="dashboard-quest-list" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: FULL QUEST BOARD -->
+        <!-- ========================================== -->
+        <div id="view-quests" class="hidden space-y-6">
+            <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">📜 จัดการกระดานเควสต์ทั้งหมด</h2>
+                    <p class="text-xs text-slate-400">เพิ่มหรือลบภารกิจพัฒนาตัวเองตามไลฟ์สไตล์ของคุณ</p>
+                </div>
+                <button onclick="openNewQuestModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> สร้างเควสต์ใหม่
+                </button>
+            </div>
+
+            <div id="full-quest-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Character Settings -->
+    <div id="char-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-user-gear text-indigo-400"></i> ปรับแต่งตัวละคร
+            </h3>
+            <form onsubmit="saveCharacter(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ชื่อผู้กล้า</label>
+                    <input type="text" id="edit-char-name" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ฉายา (Title)</label>
+                    <input type="text" id="edit-char-title" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ไอคอนอวาตาร์ (Emoji)</label>
+                    <input type="text" id="edit-char-avatar" required maxlength="4" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeCharacterModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Boss Countdown -->
+    <div id="boss-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-dragon text-amber-400"></i> จัดการ Boss Battle Countdown
+            </h3>
+            <form onsubmit="saveBoss(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ชื่อศึกใหญ่ / บอส (เช่น สอบ Mock TPAT 1)</label>
+                    <input type="text" id="boss-name" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">วันที่กำหนดเผชิญหน้า</label>
+                    <input type="date" id="boss-date" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeBossModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-600 text-white hover:bg-amber-500">บันทึกบอส</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New Quest -->
+    <div id="quest-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-scroll text-indigo-400"></i> สร้างเควสต์ใหม่
+            </h3>
+            <form onsubmit="saveNewQuest(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">ชื่อเควสต์</label>
+                    <input type="text" id="new-quest-title" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">หมวดหมู่</label>
+                        <select id="new-quest-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                            <option value="Main Quest">Main Quest</option>
+                            <option value="Side Quest">Side Quest</option>
+                            <option value="Workout">Workout</option>
+                            <option value="Discipline">Discipline</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">ค่าพลังที่จะได้รับ</label>
+                        <select id="new-quest-stat" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100">
+                            <option value="int">INT (การเรียน)</option>
+                            <option value="str">STR (ออกกำลังกาย)</option>
+                            <option value="mnd">MND (สมาธิ/พักผ่อน)</option>
+                            <option value="dex">DEX (วินัย)</option>
+                            <option value="cre">CRE (ความคิดสร้างสรรค์)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeNewQuestModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-500">เพิ่มเควสต์</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Backup -->
+    <div id="backup-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i> สำรอง / กู้คืนข้อมูล (Backup)
+            </h3>
+            <p class="text-xs text-slate-400">คุณสามารถดาวน์โหลดข้อมูลเกมทั้งหมดเก็บไว้เป็นไฟล์ JSON หรือคัดลอกข้อความเพื่อย้ายเครื่องได้</p>
+            <div class="flex gap-2">
+                <button onclick="exportData()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition">ดาวน์โหลดไฟล์ Backup</button>
+                <label class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold text-center cursor-pointer transition">
+                    นำเข้าข้อมูล <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+                </label>
+            </div>
+            <div class="text-right pt-2">
+                <button onclick="closeBackupModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript Application -->
+    <script>
+        let appData = {
+            character: {
+                name: "ผู้กล้าแห่งการเรียนรู้",
+                title: "Novice Scholar (นักปราชญ์มือใหม่)",
+                avatar: "🧙‍♂️",
+                level: 1,
+                exp: 0,
+                streak: 1,
+                intStat: { level: 1, exp: 15, pts: 15 },
+                strStat: { level: 1, exp: 10, pts: 10 },
+                mndStat: { level: 1, exp: 10, pts: 10 },
+                dexStat: { level: 1, exp: 10, pts: 10 },
+                creStat: { level: 1, exp: 10, pts: 10 }
+            },
+            quests: [
+                { id: 1, title: "ทบทวนบทเรียน / อ่านหนังสือ 1 ชม.", category: "Main Quest", statType: "int", expReward: 30, statAmount: 15, completed: false },
+                { id: 2, title: "ออกกำลังกาย / ยืดเส้นยืดสาย", category: "Workout", statType: "str", expReward: 25, statAmount: 15, completed: false },
+                { id: 3, title: "นั่งสมาธิ / พักผ่อนนอนหลับเพียงพอ", category: "Side Quest", statType: "mnd", expReward: 20, statAmount: 10, completed: false },
+                { id: 4, title: "จัดโต๊ะอ่านหนังสือให้เรียบร้อย", category: "Discipline", statType: "dex", expReward: 15, statAmount: 10, completed: false }
+            ],
+            bosses: [
+                { id: 1, name: "สอบ Mock TPAT 1", date: "2026-10-25" },
+                { id: 2, name: "สอบ Mock A-Level", date: "2026-12-05" }
+            ]
+        };
+
+        let soundEnabled = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStorage();
+            renderAll();
+        });
+
+        function switchTab(tab) {
+            document.getElementById('view-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('view-quests').classList.toggle('hidden', tab !== 'quests');
+
+            document.getElementById('tab-dashboard').className = tab === 'dashboard' 
+                ? 'px-3 py-1.5 rounded-lg transition bg-indigo-600 text-white flex items-center gap-1.5 shadow-sm' 
+                : 'px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5';
+            document.getElementById('tab-quests').className = tab === 'quests' 
+                ? 'px-3 py-1.5 rounded-lg transition bg-indigo-600 text-white flex items-center gap-1.5 shadow-sm' 
+                : 'px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5';
+        }
+
+        function renderAll() {
+            renderCharacter();
+            renderStats();
+            renderBosses();
+            renderQuests();
+        }
+
+        function renderCharacter() {
+            const c = appData.character;
+            document.getElementById('char-name').innerText = c.name;
+            document.getElementById('char-title').innerText = c.title;
+            document.getElementById('char-avatar-container').innerText = c.avatar;
+            document.getElementById('header-avatar-mini').innerText = c.avatar;
+            document.getElementById('char-level').innerText = `Lv. ${c.level}`;
+            document.getElementById('header-level').innerText = `Lv. ${c.level}`;
+            
+            const expMax = c.level * 100;
+            document.getElementById('char-exp-text').innerText = `${c.exp} / ${expMax}`;
+            document.getElementById('header-exp-text').innerText = `${c.exp} / ${expMax} EXP`;
+            const pct = Math.min(100, (c.exp / expMax) * 100);
+            document.getElementById('char-exp-bar').style.width = `${pct}%`;
+            document.getElementById('header-exp-bar').style.width = `${pct}%`;
+
+            document.getElementById('header-streak').innerText = `${c.streak} วัน`;
+
+            // Calculate Combat Power (CP)
+            const totalStats = c.intStat.pts + c.strStat.pts + c.mndStat.pts + c.dexStat.pts + c.creStat.pts;
+            const cp = c.level * 50 + totalStats;
+            document.getElementById('char-cp').innerText = cp;
+            document.getElementById('header-cp').innerText = cp;
+        }
+
+        function renderStats() {
+            const stats = appData.character;
+            ['int', 'str', 'mnd', 'dex', 'cre'].forEach(type => {
+                const s = stats[type + 'Stat'];
+                document.getElementById(`stat-lvl-${type}`).innerText = `Lv. ${s.level} (${s.pts} pts)`;
+                const barPct = Math.min(100, (s.exp / (s.level * 50)) * 100);
+                document.getElementById(`stat-bar-${type}`).style.width = `${barPct}%`;
+            });
+        }
+
+        function renderBosses() {
+            const container = document.getElementById('boss-list');
+            container.innerHTML = '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            if (appData.bosses.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">ยังไม่มีบอสที่ตั้งไว้</p>`;
+                return;
+            }
+
+            appData.bosses.forEach(b => {
+                const target = new Date(b.date);
+                const diffDays = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                const dayText = diffDays < 0 ? 'ผ่านไปแล้ว' : `${diffDays} วัน`;
+
+                container.innerHTML += `
+                    <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs font-bold text-slate-200">${b.name}</p>
+                            <p class="text-[10px] text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${b.date}</p>
+                        </div>
+                        <div class="text-right flex items-center gap-3">
+                            <span class="text-sm font-extrabold ${diffDays <= 7 && diffDays >= 0 ? 'text-red-400 animate-pulse' : 'text-amber-400'}">
+                                ${dayText}
+                            </span>
+                            <button onclick="deleteBoss(${b.id})" class="text-slate-500 hover:text-red-400 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderQuests() {
+            const dashList = document.getElementById('dashboard-quest-list');
+            const fullList = document.getElementById('full-quest-list');
+            dashList.innerHTML = '';
+            fullList.innerHTML = '';
+
+            document.getElementById('nav-quest-count').innerText = appData.quests.length;
+
+            appData.quests.forEach(q => {
+                const badgeColor = q.statType === 'int' ? 'bg-blue-950 text-blue-300 border-blue-800' :
+                                   q.statType === 'str' ? 'bg-amber-950 text-amber-300 border-amber-800' :
+                                   q.statType === 'mnd' ? 'bg-emerald-950 text-emerald-300 border-emerald-800' :
+                                   q.statType === 'dex' ? 'bg-purple-950 text-purple-300 border-purple-800' : 'bg-rose-950 text-rose-300 border-rose-800';
+
+                const htmlCard = `
+                    <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/70 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${q.completed ? 'checked' : ''} onchange="toggleQuest(${q.id})" class="w-4 h-4 rounded border-slate-600 bg-slate-900 text-indigo-600 focus:ring-0 cursor-pointer">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200 ${q.completed ? 'line-through text-slate-500' : ''}">${q.title}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full border ${badgeColor}">+${q.statAmount} ${q.statType.toUpperCase()}</span>
+                                    <span class="text-[10px] text-indigo-300 font-num">+${q.expReward} EXP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="deleteQuest(${q.id})" class="text-slate-500 hover:text-red-400 text-xs p-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                dashList.innerHTML += htmlCard;
+                fullList.innerHTML += htmlCard;
+            });
+        }
+
+        function toggleQuest(id) {
+            const q = appData.quests.find(item => item.id === id);
+            if (!q) return;
+
+            q.completed = !q.completed;
+            if (q.completed) {
+                addExpAndStat(q.expReward, q.statType, q.statAmount);
+            }
+            saveStorage();
+            renderAll();
+        }
+
+        function addExpAndStat(expAmt, statType, statAmt) {
+            const c = appData.character;
+            c.exp += expAmt;
+            const maxExp = c.level * 100;
+            if (c.exp >= maxExp) {
+                c.exp -= maxExp;
+                c.level += 1;
+                alert(`🎉 LEVEL UP! ตัวละครของคุณเลื่อนสู่ Level ${c.level} แล้ว!`);
+            }
+
+            const s = c[statType + 'Stat'];
+            s.pts += statAmt;
+            s.exp += statAmt;
+            const maxStatExp = s.level * 50;
+            if (s.exp >= maxStatExp) {
+                s.exp -= maxStatExp;
+                s.level += 1;
+                alert(`⚡ ค่าพลัง ${statType.toUpperCase()} เลื่อนสู่ Lv. ${s.level} แล้ว!`);
+            }
+        }
+
+        // Modals
+        function openCharacterModal() {
+            document.getElementById('edit-char-name').value = appData.character.name;
+            document.getElementById('edit-char-title').value = appData.character.title;
+            document.getElementById('edit-char-avatar').value = appData.character.avatar;
+            document.getElementById('char-modal').classList.remove('hidden');
+        }
+        function closeCharacterModal() { document.getElementById('char-modal').classList.add('hidden'); }
+        function saveCharacter(e) {
+            e.preventDefault();
+            appData.character.name = document.getElementById('edit-char-name').value;
+            appData.character.title = document.getElementById('edit-char-title').value;
+            appData.character.avatar = document.getElementById('edit-char-avatar').value;
+            saveStorage();
+            renderAll();
+            closeCharacterModal();
+        }
+
+        function openBossModal() { document.getElementById('boss-modal').classList.remove('hidden'); }
+        function closeBossModal() { document.getElementById('boss-modal').classList.add('hidden'); }
+        function saveBoss(e) {
+            e.preventDefault();
+            const name = document.getElementById('boss-name').value;
+            const date = document.getElementById('boss-date').value;
+            appData.bosses.push({ id: Date.now(), name, date });
+            saveStorage();
+            renderBosses();
+            closeBossModal();
+            document.getElementById('boss-name').value = '';
+            document.getElementById('boss-date').value = '';
+        }
+        function deleteBoss(id) {
+            appData.bosses = appData.bosses.filter(b => b.id !== id);
+            saveStorage();
+            renderBosses();
+        }
+
+        function openNewQuestModal() { document.getElementById('quest-modal').classList.remove('hidden'); }
+        function closeNewQuestModal() { document.getElementById('quest-modal').classList.add('hidden'); }
+        function saveNewQuest(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-quest-title').value;
+            const category = document.getElementById('new-quest-category').value;
+            const statType = document.getElementById('new-quest-stat').value;
+            appData.quests.push({ id: Date.now(), title, category, statType, expReward: 25, statAmount: 15, completed: false });
+            saveStorage();
+            renderQuests();
+            closeNewQuestModal();
+            document.getElementById('new-quest-title').value = '';
+        }
+        function deleteQuest(id) {
+            appData.quests = appData.quests.filter(q => q.id !== id);
+            saveStorage();
+            renderQuests();
+        }
+
+        function openBackupModal() { document.getElementById('backup-modal').classList.remove('hidden'); }
+        function closeBackupModal() { document.getElementById('backup-modal').classList.add('hidden'); }
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "adventurers_log_backup.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+        function importData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    appData = JSON.parse(evt.target.result);
+                    saveStorage();
+                    renderAll();
+                    alert('นำเข้าข้อมูลสำเร็จ!');
+                    closeBackupModal();
+                } catch(err) {
+                    alert('ไฟล์ไม่ถูกต้อง!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-btn');
+            btn.innerHTML = soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-slate-500"></i>';
+        }
+
+        function saveStorage() {
+            localStorage.setItem('rpg_clean_data', JSON.stringify(appData));
+        }
+        function loadStorage() {
+            const saved = localStorage.getItem('rpg_clean_data');
+            if (saved) {
+                appData = JSON.parse(saved);
+            }
+        }
+    </script>
+</body>
+</html>
